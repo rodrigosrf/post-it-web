@@ -141,7 +141,7 @@ const NoteCard = ({ note, onClick, isQuick }) => (
     <div className="note-info">
       <div className="note-title-row">
         <FileText size={16} className="note-icon" />
-        <h3>{note.text ? note.text.split(/<br>|<\/div>|<div>/)[0].replace(/<[^>]*>/g, '') || 'Sem título' : 'Sem título'}</h3>
+        <h3>{note.text ? note.text.split(/<br>|<\/div>|<div>/)[0].replace(/<[^>]*>/g, '') || (isQuick ? 'Notas Rápidas' : 'Sem título') : (isQuick ? 'Notas Rápidas' : 'Sem título')}</h3>
       </div>
       <p className="note-preview">
         {note.text ? note.text.replace(/<[^>]*>/g, ' ').substring(0, 100) : '...'}...

@@ -66,6 +66,7 @@ const AppContent = () => {
             <NoteReader 
               note={selectedNote} 
               onBack={handleBack} 
+              onNoteUpdate={setSelectedNote}
             />
           </motion.div>
         )}

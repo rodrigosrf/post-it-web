@@ -1,10 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { ChevronLeft, Share, ExternalLink, Calendar, Tag, Edit3, Save, X } from 'lucide-react';
+import { ChevronLeft, Calendar, Tag, Edit3, Save, X } from 'lucide-react';
 import { githubService } from '../services/githubService';
 import { useAppContext } from '../AppContext';
 import '../styles/NoteReader.css';
 
-const NoteReader = ({ note, onBack }) => {
+const NoteReader = ({ note, onBack, onNoteUpdate }) => {
   const { config, setNotes } = useAppContext();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -13,9 +13,10 @@ const NoteReader = ({ note, onBack }) => {
 
   if (!note) return null;
 
+  const defaultTitle = note.isQuickNote ? 'Notas Rápidas' : 'Sem título';
   const title = note.text 
-    ? note.text.split(/<br>|<\/div>|<div>/)[0].replace(/<[^>]*>/g, '') || 'Sem título' 
-    : 'Sem título';
+    ? note.text.split(/<br>|<\/div>|<div>/)[0].replace(/<[^>]*>/g, '') || defaultTitle 
+    : defaultTitle;
 
   const handleSave = async () => {
     if (!contentRef.current) return;
@@ -46,7 +47,12 @@ const NoteReader = ({ note, onBack }) => {
       );
 
       // Update local state
-      setNotes(prev => prev.map(n => n.name === note.name ? { ...updatedNote, sha: response.content.sha } : n));
+      const updatedNoteWithSha = { ...updatedNote, sha: response.content.sha };
+      setNotes(prev => prev.map(n => n.name === note.name ? updatedNoteWithSha : n));
+      
+      if (onNoteUpdate) {
+        onNoteUpdate(updatedNoteWithSha);
+      }
 
       setIsEditing(false);
     } catch (err) {
@@ -76,13 +82,11 @@ const NoteReader = ({ note, onBack }) => {
             </>
           ) : (
             <>
-              <button className="icon-btn edit" onClick={() => setIsEditing(true)}>
-                <Edit3 size={20} />
-              </button>
-              <button className="icon-btn"><Share size={20} /></button>
-              <button className="icon-btn" onClick={() => window.open(`https://github.com/rodrigosrf/doc-work/blob/main/notes_db/${note.name}`, '_blank')}>
-                <ExternalLink size={20} />
-              </button>
+              {note.isQuickNote && (
+                <button className="icon-btn edit" onClick={() => setIsEditing(true)}>
+                  <Edit3 size={20} />
+                </button>
+              )}
             </>
           )}
         </div>
@@ -110,8 +114,8 @@ const NoteReader = ({ note, onBack }) => {
 
         <div 
           ref={contentRef}
-          className={`html-content ${isEditing ? 'editing-mode' : ''}`}
-          contentEditable={isEditing}
+          className={`html-content ${isEditing && note.isQuickNote ? 'editing-mode' : ''}`}
+          contentEditable={isEditing && note.isQuickNote}
           dangerouslySetInnerHTML={{ __html: note.text }} 
           onInput={(e) => {
             // Optional: Handle input changes if needed
