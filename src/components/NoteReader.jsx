@@ -13,10 +13,9 @@ const NoteReader = ({ note, onBack, onNoteUpdate }) => {
 
   if (!note) return null;
 
-  const defaultTitle = note.isQuickNote ? 'Notas Rápidas' : 'Sem título';
-  const title = note.text 
-    ? note.text.split(/<br>|<\/div>|<div>/)[0].replace(/<[^>]*>/g, '') || defaultTitle 
-    : defaultTitle;
+  const title = note.isQuickNote 
+    ? 'Notas Rápidas' 
+    : (note.text ? note.text.split(/<br>|<\/div>|<div>/)[0].replace(/<[^>]*>/g, '') || 'Sem título' : 'Sem título');
 
   const handleSave = async () => {
     if (!contentRef.current) return;
